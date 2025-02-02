@@ -10,7 +10,22 @@ import os
 import numpy as np
 from numpy import asarray
 from numpy import savetxt
-from numpy import loadtxt
+
+def ceildiv(a ,b):
+    return -(a //-b)
+
+def image_split(root):
+    img_path = root+'//all'
+    img_dir = os.listdir(img_path)
+
+    split_dim = [28,28]
+    
+    for file in img_dir:
+        image = cv2.imread(file)
+        
+        M = ceildiv(image.shape[0], split_dim[0])
+        N = ceildiv(image.shape[0], split_dim[0])
+        
 
 def create_labels_csv(root):
     clean_path = root+'//clean'

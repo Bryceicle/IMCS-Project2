@@ -20,71 +20,9 @@ import torchvision.transforms.functional as transform_functional
 from torcheval.metrics.functional import binary_f1_score
 import pandas as pd
 
-def load_image_dataset_to_array(path):
-    dir_list = os.listdir(path)
-    image_list = []
-    
-    for file in dir_list:
-        image = cv2.imread(path+'//'+file)
-        image_list.append(image)
-        
-    return image_list
-
-def load_lsb_train_array_from_file():
-    
-    if os.path.exists('C:\imcs3010\IMCS-Project2\clean_lsb_train_data.npy'):
-        clean = loadtxt('clean_lsb_train_data.npy', delimiter=',')
-    else: 
-        return 0
-    if os.path.exists('C:\imcs3010\IMCS-Project2\stego_lsb_train_data.npy'):
-        stego = loadtxt('stego_lsb_train_data.npy', delimiter=',')
-    else: 
-        return 0
-    
-    return clean, stego
-
-def load_lsb_arrays(path, flag):
-        
-    if flag == 'train':
-        train_clean_path = path+'//train//train//clean'
-        train_stego_path = path+'//train//train//stego'
-        
-        train_clean_dataset = load_image_dataset_to_array(train_clean_path)
-        train_stego_dataset = load_image_dataset_to_array(train_stego_path)
-            
-        clean_target = [0]*len(train_clean_dataset)
-        stego_target = [1]*len(train_stego_dataset)
-            
-        dataset = asarray(train_clean_dataset + train_stego_dataset)
-        targets = clean_target + stego_target
-            
-        train_set = [dataset, targets]
-        tensor = torch.tensor(train_set)
-
-            
-    else:
-        test_clean_path = path+'//test//test//clean'
-        test_stego_path = path+'//test//test//stego'
-            
-        test_clean_dataset = load_image_dataset_to_array(test_clean_path)
-        test_stego_dataset = load_image_dataset_to_array(test_stego_path)
-            
-        clean_target = [0]*test_clean_dataset.shape[0]
-        stego_target = [1]*test_stego_dataset.shape[0]
-            
-        dataset = asarray(test_clean_dataset + test_stego_dataset)
-        targets = clean_target + stego_target
-            
-        train_set = [dataset, targets]
-        tensor = torch.tensor(train_set)
-
-    print('loaded!')
-        
-    return tensor 
-
 class LSB_Dataset(data.Dataset):
     
-    def __init__(self, labels_file, img_dir, transform=None, target_transform=None):
+    def __init__(self, labels_file, img_dir, trans=None, target_transform=None):
         
         self.img_labels = pd.read_csv(labels_file)
         self.img_dir = img_dir
@@ -103,7 +41,7 @@ class LSB_Dataset(data.Dataset):
         else:
             label = torch.tensor([0,1])
         if self.transform:
-            image = image.transform(image) 
+            image = image.trans(image) 
         if self.target_transform:
             label = self.target_transform(label)
         
@@ -183,10 +121,11 @@ optimizer = optim.SGD(LSB_Model.parameters(), lr=lr, momentum=0.9)
 
 criterion = nn.BCEWithLogitsLoss()
 
+"""
 data_transform = transform.Compose(
     transform.Normalize(0.5, 0.5)
     )
-
+"""
         
 def main():
     
