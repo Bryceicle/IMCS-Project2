@@ -12,11 +12,16 @@ from numpy import asarray
 from numpy import savetxt
 
 def image_split_and_label(root, multiclass):
+    
     test_root = root + '//test//test'
     train_root = root + '//train//train'
     
-    savetxt('lsb_test_labels.csv', asarray(image_split_and_label_binary(test_root)), delimiter=',', fmt="%s")
-    savetxt('lsb_train_labels.csv', asarray(image_split_and_label_binary(train_root)), delimiter=',', fmt="%s")
+    if multiclass == 0:
+        savetxt('lsb_test_labels_binary.csv', asarray(image_split_and_label_binary(test_root)), delimiter=',', fmt="%s")
+        savetxt('lsb_train_labels_binary.csv', asarray(image_split_and_label_binary(train_root)), delimiter=',', fmt="%s")
+    else:
+        savetxt('lsb_test_labels_multiclass.csv', asarray(image_split_and_label_multiclass(test_root)), delimiter=',', fmt="%s")
+        savetxt('lsb_train_labels_multiclass.csv', asarray(image_split_and_label_multiclass(train_root)), delimiter=',', fmt="%s")
     
     return
 

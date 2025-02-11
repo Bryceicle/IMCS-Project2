@@ -5,8 +5,6 @@ Created on Thu Feb  6 12:55:55 2025
 @author: Allen
 """
 
-import os
-import cv2 
 import numpy as np
 
 def rgbToLSB(image):

@@ -11,12 +11,21 @@ import numpy as np
 from numpy import asarray
 from numpy import savetxt
 
-def image_split_and_label(root, multiclass):
+def image_split_and_label(root, binaryClass):
+    
     test_root = root + '//test//test'
     train_root = root + '//train//train'
     
-    savetxt('lsb_test_labels.csv', asarray(image_split_and_label_binary(test_root)), delimiter=',', fmt="%s")
-    savetxt('lsb_train_labels.csv', asarray(image_split_and_label_binary(train_root)), delimiter=',', fmt="%s")
+    if binaryClass:
+        if os.path.exists(test_root) and not os.path.isfile(test_root+'//'+'lsb_test_labels_binary.csv'):
+            savetxt('lsb_test_labels_binary.csv', asarray(image_split_and_label_binary(test_root)), delimiter=',', fmt="%s")
+        if os.path.exists(train_root) and not os.path.isfile(train_root+'//'+'lsb_train_labels_binary.csv'):
+            savetxt('lsb_train_labels_binary.csv', asarray(image_split_and_label_binary(train_root)), delimiter=',', fmt="%s")
+    else:
+        if os.path.exists(test_root) and not os.path.isfile(test_root+'//'+'lsb_test_labels_multiclass.csv'):
+            savetxt('lsb_test_labels_multiclass.csv', asarray(image_split_and_label_multiclass(test_root)), delimiter=',', fmt="%s")
+        if os.path.exists(train_root) and not os.path.isfile(train_root+'//'+'lsb_train_labels_multiclass.csv'):
+            savetxt('lsb_train_labels_multiclass.csv', asarray(image_split_and_label_multiclass(train_root)), delimiter=',', fmt="%s")
     
     return
 
@@ -130,3 +139,12 @@ def image_split_and_label_multiclass(root):
     
     os.chdir(root)     
     return image_name_list
+
+def main():
+    
+    root = 'C://imcs3010//LSB Dataset 2'
+    image_split_and_label(root, True)
+    
+    return
+
+main()
