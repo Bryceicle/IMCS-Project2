@@ -13,8 +13,8 @@ from numpy import savetxt
 
 def image_split_and_label(root, binaryClass):
     
-    test_root = root + '//test//test'
-    train_root = root + '//train//train'
+    test_root = root + '/test/test'
+    train_root = root + '/train/train'
     
     if binaryClass:
         if os.path.exists(test_root) and not os.path.isfile(test_root+'//'+'lsb_test_labels_binary.csv'):
@@ -30,8 +30,8 @@ def image_split_and_label(root, binaryClass):
     return
 
 def image_split_and_label_binary(root):
-    clean_path = root+'//clean'
-    stego_path = root+'//stego'
+    clean_path = root+'/clean'
+    stego_path = root+'/stego'
     clean_dir = os.listdir(clean_path)
     stego_dir = os.listdir(stego_path)
     
@@ -39,13 +39,13 @@ def image_split_and_label_binary(root):
     split_dim = [124,124]
     
     for file in clean_dir:
-        image = cv2.imread(clean_path+'//'+file)
+        image = cv2.imread(clean_path+'/'+file)
         
         tiles = [image[x:x+split_dim[0], y:y+split_dim[1]] for x in range(0, image.shape[0]-(image.shape[0]%split_dim[0]),split_dim[0]) for y in range(0, image.shape[1]-(image.shape[1]%split_dim[1]),split_dim[1])]
         
         i = 0
         
-        os.chdir(root+'//split')
+        os.chdir(root+'/split')
         
         for split in tiles:
             filename = file[:-4]+'split'+str(i)+'.png'
@@ -53,18 +53,18 @@ def image_split_and_label_binary(root):
             temp[0] = filename
             image_name_list.append(temp)
                 
-            if not os.path.isfile(root+'//split//'+filename):
+            if not os.path.isfile(root+'/split/'+filename):
                 cv2.imwrite(filename, split)
             i+=1
             
     for file in stego_dir:
-        image = cv2.imread(stego_path+'//'+file)
+        image = cv2.imread(stego_path+'/'+file)
         
         tiles = [image[x:x+split_dim[0], y:y+split_dim[1]] for x in range(0, image.shape[0]-(image.shape[0]%split_dim[0]),split_dim[0]) for y in range(0, image.shape[1]-(image.shape[1]%split_dim[1]),split_dim[1])]
         
         i = 0
         
-        os.chdir(root+'//split')
+        os.chdir(root+'/split')
         
         for split in tiles:
             filename = file[:-4]+'split'+str(i)+'.png'
@@ -72,7 +72,7 @@ def image_split_and_label_binary(root):
             temp[0] = filename
             image_name_list.append(temp)
                 
-            if not os.path.isfile(root+'//split//'+filename):
+            if not os.path.isfile(root+'/split/'+filename):
                 cv2.imwrite(filename, split)
             i+=1
     
@@ -89,13 +89,13 @@ def image_split_and_label_multiclass(root):
     split_dim = [124,124]
     
     for file in clean_dir:
-        image = cv2.imread(clean_path+'//'+file)
+        image = cv2.imread(clean_path+'/'+file)
         
         tiles = [image[x:x+split_dim[0], y:y+split_dim[1]] for x in range(0, image.shape[0]-(image.shape[0]%split_dim[0]),split_dim[0]) for y in range(0, image.shape[1]-(image.shape[1]%split_dim[1]),split_dim[1])]
         
         i = 0
         
-        os.chdir(root+'//split')
+        os.chdir(root+'/split')
         
         for split in tiles:
             filename = file[:-4]+'split'+str(i)+'.png'
@@ -103,18 +103,18 @@ def image_split_and_label_multiclass(root):
             temp[0] = filename
             image_name_list.append(temp)
                 
-            if not os.path.isfile(root+'//split//'+filename):
+            if not os.path.isfile(root+'/split/'+filename):
                 cv2.imwrite(filename, split)
             i+=1
             
     for file in stego_dir:
-        image = cv2.imread(stego_path+'//'+file)
+        image = cv2.imread(stego_path+'/'+file)
         
         tiles = [image[x:x+split_dim[0], y:y+split_dim[1]] for x in range(0, image.shape[0]-(image.shape[0]%split_dim[0]),split_dim[0]) for y in range(0, image.shape[1]-(image.shape[1]%split_dim[1]),split_dim[1])]
         
         i = 0
         
-        os.chdir(root+'//split')
+        os.chdir(root+'/split')
         
         for split in tiles:
             filename = file[:-4]+'split'+str(i)+'.png'
@@ -133,7 +133,7 @@ def image_split_and_label_multiclass(root):
             temp[0] = filename
             image_name_list.append(temp)
                 
-            if not os.path.isfile(root+'//split//'+filename):
+            if not os.path.isfile(root+'/split/'+filename):
                 cv2.imwrite(filename, split)
             i+=1
     
@@ -142,7 +142,7 @@ def image_split_and_label_multiclass(root):
 
 def main():
     
-    root = 'C://imcs3010//LSB Dataset 2'
+    root = '/home/bryce/PycharmProjects/IMCS Datasets/marcozuppelli'
     image_split_and_label(root, True)
     
     return

@@ -49,93 +49,86 @@ class LSB_Dataset(data.Dataset):
             label = self.target_transform(label)
         
         return image, label
-            
 
-class LSB_ConvNet(nn.Module):
-    def __init__(self, in_channels, num_classes):
-        super(LSB_ConvNet, self).__init__()
-        
-        self.layer1 = nn.Sequential(
-            nn.Conv2d(in_channels, 16, kernel_size=3),
-            nn.BatchNorm2d(16),
+class ResidualBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, stride=1, downsample=None):
+        super(ResidualBlock, self).__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1),
+            nn.BatchNorm2d(out_channels),
             nn.ReLU())
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(out_channels))
+        self.downsample = downsample
+        self.relu = nn.ReLU()
+        self.out_channels = out_channels
 
-        self.layer2 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=3),
-            nn.BatchNorm2d(16),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
-        
-        self.layer3 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=3),
-            nn.BatchNorm2d(16),
-            nn.ReLU())
-
-        self.layer4 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=3),
-            nn.BatchNorm2d(16),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
-        
-        self.layer5 = nn.Sequential(
-            nn.Conv2d(16, 64, kernel_size=3),
-            nn.BatchNorm2d(64),
-            nn.ReLU())
-
-        self.layer6 = nn.Sequential(
-            nn.Conv2d(64, 64, kernel_size=3),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
-
-        self.layer7 = nn.Sequential(
-            nn.Conv2d(64, 64, kernel_size=3),
-            nn.BatchNorm2d(64),
-            nn.ReLU())
-        
-        self.layer8 = nn.Sequential(
-            nn.Conv2d(64, 64, kernel_size=3),
-            nn.BatchNorm2d(64),
-            nn.ReLU())
-
-        self.layer9 = nn.Sequential(
-            nn.Conv2d(64, 64, kernel_size=3, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
-        
-        self.fc = nn.Sequential(
-            nn.Linear(64 * 4 * 4, 128),
-            nn.ReLU(),
-            nn.Linear(128, 128),
-            nn.ReLU(),
-            nn.Linear(128, num_classes))
-        
     def forward(self, x):
+        residual = x
+        out = self.conv1(x)
+        out = self.conv2(out)
+        if self.downsample:
+            residual = self.downsample(x)
+        out += residual
+        out = self.relu(out)
+        return out
+
+class ResNet(nn.Module):
+    def __init__(self, block, layers, num_classes=10):
+        super(ResNet, self).__init__()
+        self.inplanes = 16
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(3, 16, kernel_size=7, stride=2, padding=3),
+            nn.BatchNorm2d(16),
+            nn.ReLU())
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.layer0 = self._make_layer(block, 16, layers[0], stride=1)
+        self.layer1 = self._make_layer(block, 64, layers[1], stride=2)
+        self.layer2 = self._make_layer(block, 128, layers[2], stride=2)
+        #self.layer3 = self._make_layer(block, 256, layers[3], stride=2)
+        self.avgpool = nn.AvgPool2d(7, stride=1)
+        self.fc = nn.Linear(512, num_classes)
+
+    def _make_layer(self, block, planes, blocks, stride=1):
+        downsample = None
+        if stride != 1 or self.inplanes != planes:
+            downsample = nn.Sequential(
+                nn.Conv2d(self.inplanes, planes, kernel_size=1, stride=stride),
+                nn.BatchNorm2d(planes),
+            )
+        layers = []
+        layers.append(block(self.inplanes, planes, stride, downsample))
+        self.inplanes = planes
+        for i in range(1, blocks):
+            layers.append(block(self.inplanes, planes))
+
+        return nn.Sequential(*layers)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.maxpool(x)
+        x = self.layer0(x)
         x = self.layer1(x)
         x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
-        x = self.layer5(x)
-        x = self.layer6(x)
-        x = self.layer7(x)
-        x = self.layer8(x)
-        x = self.layer9(x)
+        #x = self.layer3(x)
+
+        x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
+
         return x
         
-train_root_dir = 'C://imcs3010//LSB Dataset'
-test_root_dir = 'C://imcs3010//LSB Dataset 2'
+train_root_dir = '/home/bryce/PycharmProjects/IMCS Datasets/marcozuppelli/'
+test_root_dir = '/home/bryce/PycharmProjects/IMCS Datasets/marcozuppelli/'
 
 BATCH_SIZE = 128
 lr = 0.001
 NUM_EPOCHS = 1
 
 num_classes = 1
-input_channels = 3
 
-LSB_Model = LSB_ConvNet(input_channels, num_classes)
+LSB_Model = ResNet(ResidualBlock, [2,2,2], num_classes)
 
 optimizer = optim.SGD(LSB_Model.parameters(), lr=lr, momentum=0.9)
 
@@ -155,11 +148,11 @@ def main():
     else:
         label_class = 'multiclass'
     
-    train_labels = train_root_dir+'//train//train//lsb_train_labels_'+label_class+'.csv'
-    test_labels = test_root_dir+'//test//test//lsb_test_labels_'+label_class+'.csv'
+    train_labels = train_root_dir+'/train/train/lsb_train_labels_'+label_class+'.csv'
+    test_labels = test_root_dir+'/test/test/lsb_test_labels_'+label_class+'.csv'
     
-    train_data = LSB_Dataset(train_labels, train_root_dir+'//train//train//split')
-    test_data = LSB_Dataset(test_labels, test_root_dir+'//test//test//split')
+    train_data = LSB_Dataset(train_labels, train_root_dir+'/train/train/split')
+    test_data = LSB_Dataset(test_labels, test_root_dir+'/test/test/split')
       
     train_dataloader = data.DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
     train_dataloader_at_eval = data.DataLoader(train_data, batch_size=2*BATCH_SIZE, shuffle=False)
