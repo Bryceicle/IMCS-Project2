@@ -124,7 +124,7 @@ test_root_dir = '/home/bryce/PycharmProjects/IMCS Datasets/marcozuppelli/'
 
 BATCH_SIZE = 128
 lr = 0.001
-NUM_EPOCHS = 1
+NUM_EPOCHS = 3
 
 num_classes = 1
 
@@ -157,26 +157,36 @@ def main():
     train_dataloader = data.DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
     train_dataloader_at_eval = data.DataLoader(train_data, batch_size=2*BATCH_SIZE, shuffle=False)
     test_dataloader = data.DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=True)
-    
-    print("Done.\n==> Training model...")
-   
-    for epoch in range(NUM_EPOCHS):
-        
-        LSB_Model.train()
-        for inputs, targets in tqdm(train_dataloader):
-            # forward + backward + optimize
-            optimizer.zero_grad()
-            outputs = LSB_Model(inputs)
-            
-            if num_classes == 1:
-                targets = targets.to(torch.float32)
-                loss = criterion(outputs, targets)
-            else:
-                targets = targets.squeeze().long()
-                loss = criterion(outputs, targets)
-            
-            loss.backward()
-            optimizer.step()
+
+    load_model = True
+
+    if not load_model:
+
+        print("Done.\n==> Training model...")
+
+        for epoch in range(NUM_EPOCHS):
+
+            LSB_Model.train()
+            for inputs, targets in tqdm(train_dataloader):
+                # forward + backward + optimize
+                optimizer.zero_grad()
+                outputs = LSB_Model(inputs)
+
+                if num_classes == 1:
+                    targets = targets.to(torch.float32)
+                    loss = criterion(outputs, targets)
+                else:
+                    targets = targets.squeeze().long()
+                    loss = criterion(outputs, targets)
+
+                loss.backward()
+                optimizer.step()
+
+        torch.save(LSB_Model.state_dict(), '/home/bryce/PycharmProjects/LSB_ResNet.pth')
+
+    else:
+        print("Done.\n==> Loading model...")
+        LSB_Model.load_state_dict(torch.load('/home/bryce/PycharmProjects/LSB_ResNet.pth'))
             
     # evaluation
     
