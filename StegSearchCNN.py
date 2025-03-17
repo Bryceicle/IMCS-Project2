@@ -124,9 +124,8 @@ class LSB_ConvNet(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.fc(x)
         return x
-        
-train_root_dir = '/home/bryce/PycharmProjects/IMCS Datasets/marcozuppelli/'
-test_root_dir = '/home/bryce/PycharmProjects/IMCS Datasets/marcozuppelli/'
+
+dir = '/home/bryce/PycharmProjects/IMCS Datasets/MobiStego_S8_0-10_auto/'
 
 BATCH_SIZE = 128
 lr = 0.001
@@ -155,11 +154,11 @@ def main():
     else:
         label_class = 'multiclass'
     
-    train_labels = train_root_dir+'/train/train/lsb_train_labels_'+label_class+'.csv'
-    test_labels = test_root_dir+'/test/test/lsb_test_labels_'+label_class+'.csv'
+    train_labels = dir+'train/split/lsb_train_labels_'+label_class+'.csv'
+    test_labels = dir+'test/split/lsb_test_labels_'+label_class+'.csv'
     
-    train_data = LSB_Dataset(train_labels, train_root_dir+'/train/train/split')
-    test_data = LSB_Dataset(test_labels, test_root_dir+'/test/test/split')
+    train_data = LSB_Dataset(train_labels, dir+'train/split')
+    test_data = LSB_Dataset(test_labels, dir+'test/split')
       
     train_dataloader = data.DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
     train_dataloader_at_eval = data.DataLoader(train_data, batch_size=2*BATCH_SIZE, shuffle=False)
