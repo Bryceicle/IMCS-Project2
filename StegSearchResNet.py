@@ -3,7 +3,7 @@
 IMCS Project 2 - Winter 2025
 Bryce Gill - 100666638
 """
-
+from sympy.strategies.core import switch
 from tqdm import tqdm
 import cv2
 import numpy as np
@@ -118,8 +118,26 @@ class ResNet(nn.Module):
         x = self.fc(x)
 
         return x
-        
-dir = '/home/bryce/PycharmProjects/IMCS Datasets/MobiStego_S8_0-10_auto/'
+
+
+dataset = 2
+
+match dataset:
+
+    case 1:
+        dataDir = 'JPEG_Only'
+
+    case 2:
+        dataDir = 'PNG_Only'
+
+    case 3:
+        dataDir = 'combined'
+
+
+
+trainDir = '/home/bryce/PycharmProjects/IMCS_Datasets/'+dataDir+'/train/'
+
+testDir = '/home/bryce/PycharmProjects/IMCS_Datasets/'+dataDir+'/test/'
 
 BATCH_SIZE = 128
 lr = 0.001
@@ -140,24 +158,24 @@ else:
         
 def main():
     
-    print("==> Loading Data ...")
+    print("Loading Data ...")
     
     if num_classes == 1:
         label_class = 'binary'
     else:
         label_class = 'multiclass'
 
-    train_labels = dir + 'train/split/lsb_train_labels_' + label_class + '.csv'
-    test_labels = dir + 'test/split/lsb_test_labels_' + label_class + '.csv'
+    train_labels = trainDir + 'split/lsb_train_labels_' + label_class + '.csv'
+    test_labels = testDir + 'split/lsb_test_labels_' + label_class + '.csv'
 
-    train_data = LSB_Dataset(train_labels, dir + 'train/split')
-    test_data = LSB_Dataset(test_labels, dir + 'test/split')
+    train_data = LSB_Dataset(train_labels, trainDir + 'split/')
+    test_data = LSB_Dataset(test_labels, testDir + 'split/')
       
     train_dataloader = data.DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
     train_dataloader_at_eval = data.DataLoader(train_data, batch_size=2*BATCH_SIZE, shuffle=False)
     test_dataloader = data.DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=True)
 
-    load_model = True
+    load_model = False
 
     if not load_model:
 
@@ -181,11 +199,11 @@ def main():
                 loss.backward()
                 optimizer.step()
 
-        torch.save(LSB_Model.state_dict(), '/home/bryce/PycharmProjects/LSB_ResNet.pth')
+        torch.save(LSB_Model.state_dict(), '/home/bryce/PycharmProjects/LSB_ResNet_'+dataDir+'.pth')
 
     else:
-        print("Done.\n==> Loading model...")
-        LSB_Model.load_state_dict(torch.load('/home/bryce/PycharmProjects/LSB_ResNet.pth'))
+        print("Done.\nLoading model...\n")
+        LSB_Model.load_state_dict(torch.load('/home/bryce/PycharmProjects/LSB_ResNet_'+dataDir+'.pth'))
             
     # evaluation
     
@@ -208,7 +226,6 @@ def main():
                 if num_classes == 1:
                     targets = targets.to(torch.float32)
                     outputs = outputs.softmax(dim=-1)
-                
                 else:
                     targets = targets.squeeze().long()
                     outputs = outputs.softmax(dim=-1)

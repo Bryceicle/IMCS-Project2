@@ -14,104 +14,71 @@ from sympy.strategies.core import switch
 import shutil
 
 
-def datasetPrep(root, binaryClass, dataset):
+def datasetPrep(root, binaryClass, target):
 
-    if dataset == 0:
-        train_root = root + 'train/train/'
-        test_root = 'test/test/'
+    originals_root = root + 'originals/'
+    stegos_root = root + 'stegos/'
 
-        if binaryClass:
-            if os.path.exists(test_root) and not os.path.isfile(test_root + 'lsb_test_labels_binary.csv'):
-                clean_path = test_root + 'clean/'
-                stego_path = test_root + 'stego/'
-                os.chdir(clean_path)
-                savetxt('lsb_test_labels_binary.csv', asarray(image_split_and_label_binary(clean_path)), delimiter=',',
-                        fmt="%s")
-                os.chdir(stego_path)
-                savetxt('lsb_test_labels_binary.csv', asarray(image_split_and_label_binary(stego_path)), delimiter=',',
-                        fmt="%s")
-            if os.path.exists(train_root) and not os.path.isfile(train_root + 'lsb_train_labels_binary.csv'):
-                clean_path = train_root + 'clean/'
-                stego_path = train_root + 'stego/'
-                os.chdir(clean_path)
-                savetxt('lsb_train_labels_binary.csv', asarray(image_split_and_label_binary(clean_path)), delimiter=',',
-                        fmt="%s")
-                os.chdir(stego_path)
-                savetxt('lsb_train_labels_binary.csv', asarray(image_split_and_label_binary(stego_path)), delimiter=',',
-                        fmt="%s")
-        else:
-            if os.path.exists(test_root) and not os.path.isfile(test_root + 'lsb_test_labels_multiclass.csv'):
-                clean_path = test_root + 'clean/'
-                stego_path = test_root + 'stego/'
-                os.chdir(clean_path)
-                savetxt('lsb_test_labels_multiclass.csv', asarray(image_split_and_label_multiclass(clean_path, 0)),
-                        delimiter=',', fmt="%s")
-                os.chdir(stego_path)
-                savetxt('lsb_test_labels_multiclass.csv', asarray(image_split_and_label_multiclass(stego_path, 1)),
-                        delimiter=',', fmt="%s")
-            if os.path.exists(train_root) and not os.path.isfile(train_root + 'lsb_train_labels_multiclass.csv'):
-                clean_path = train_root + 'clean/'
-                stego_path = train_root + 'stego/'
-                os.chdir(clean_path)
-                savetxt('lsb_test_labels_multiclass.csv', asarray(image_split_and_label_multiclass(clean_path, 0)),
-                        delimiter=',', fmt="%s")
-                os.chdir(stego_path)
-                savetxt('lsb_test_labels_multiclass.csv', asarray(image_split_and_label_multiclass(stego_path, 1)),
-                        delimiter=',', fmt="%s")
+    if not os.path.exists(target + 'train/originals/'):
+        os.mkdir(target + 'train/')
+        os.mkdir(target + 'train/originals/')
 
-    else:
-        originals_root = root + 'originals/'
-        stegos_root = root + 'stegos/'
-        trainRoot = root + 'train/'
-        testRoot = root + 'test/'
-        if not os.path.exists(trainRoot):
-            os.mkdir(trainRoot)
-        if not os.path.exists(testRoot):
-            os.mkdir(testRoot)
+    if not os.path.exists(target + 'train/stegos/'):
+        os.mkdir(target + 'train/stegos/')
 
+    if not os.path.exists(target + 'test/originals/'):
+        os.mkdir(target + 'test/')
+        os.mkdir(target + 'test/originals/')
+
+    if not os.path.exists(target + 'test/stegos/'):
+        os.mkdir(target + 'test/stegos/')
+
+    originals_train = target + 'train/originals/'
+    stegos_train = target + 'train/stegos/'
+    originals_test = target + 'test/originals/'
+    stegos_test = target + 'test/stegos/'
+
+    if os.path.exists(originals_root):
         originals_list = os.listdir(originals_root)
         i = 0
         for file in originals_list:
-            if i == 0:
-                filename = file.split('.')[0] + '0.' + file.split('.')[1]
-                if not os.path.exists(trainRoot+file) and not file.split('.')[1] == 'DNG':
-                    shutil.copy2(originals_root+file, trainRoot+filename)
-                    i = 1
-            if i == 1:
-                filename = file.split('.')[0] + '0.' + file.split('.')[1]
-                if not os.path.exists(testRoot+file) and not file.split('.')[1] == 'DNG':
-                    shutil.copy2(originals_root+file, testRoot+filename)
-                    i = 0
+            if i != 0 and i%3 == 0:
+                if not os.path.exists(originals_test+file) and not file.split('.')[1] == 'DNG':
+                    shutil.copy2(originals_root+file, originals_test+file)
+                    i += 1
+            else:
+                if not os.path.exists(originals_train+file) and not file.split('.')[1] == 'DNG':
+                    shutil.copy2(originals_root+file, originals_train+file)
+                    i += 1
 
+    if os.path.exists(stegos_root):
         stegos_list = os.listdir(stegos_root)
+        i = 0
         for file in stegos_list:
-            if i == 0:
-                filename = file.split('.')[0]+'1.'+file.split('.')[1]
-                if not os.path.exists(trainRoot+file) and not file.split('.')[1] == 'DNG':
-                    shutil.copy2(stegos_root+file, trainRoot+filename)
-                    i = 1
-            if i == 1:
-                filename = file.split('.')[0]+'1.'+file.split('.')[1]
-                if not os.path.exists(testRoot+file) and not file.split('.')[1] == 'DNG':
-                    shutil.copy2(stegos_root+file, testRoot+filename)
-                    i = 0
+            if i != 0 and i % 3 == 0:
+                if not os.path.exists(stegos_test + file) and not file.split('.')[1] == 'DNG':
+                    shutil.copy2(stegos_root + file, stegos_test + file)
+                    i += 1
+            else:
+                if not os.path.exists(stegos_train + file) and not file.split('.')[1] == 'DNG':
+                    shutil.copy2(stegos_root + file, stegos_train + file)
+                    i += 1
 
-        if os.path.exists(trainRoot) and not os.path.isfile(trainRoot+'lsb_train_labels_binary.csv'):
-            savetxt('lsb_train_labels_binary.csv', asarray(image_split_and_label_binary(trainRoot)), delimiter=',',fmt="%s")
-        if os.path.exists(testRoot) and not os.path.isfile(stegos_root+'lsb_test_labels_binary.csv'):
-            savetxt('lsb_test_labels_binary.csv', asarray(image_split_and_label_binary(testRoot)), delimiter=',',fmt="%s")
-
-    return
+        return
+    
 
 def image_split_and_label_binary(path):
+    originals = path + 'originals/'
+    stegos = path + 'stegos/'
+
     image_name_list = []
     split_dim = [124, 124]
 
-    if os.path.exists(path):
-        direct = os.listdir(path)
+    if os.path.exists(originals):
+        direct = os.listdir(originals)
 
         for file in direct:
-            image = cv2.imread(path + file)
+            image = cv2.imread(originals + file)
             tiles = [image[x:x + split_dim[0], y:y + split_dim[1]] for x in
                      range(0, image.shape[0] - (image.shape[0] % split_dim[0]), split_dim[0]) for y in
                      range(0, image.shape[1] - (image.shape[1] % split_dim[1]), split_dim[1])]
@@ -125,10 +92,7 @@ def image_split_and_label_binary(path):
                 os.chdir(path + 'split/')
 
             for split in tiles:
-                if file.split('.')[0][-1] == '0':
-                    temp = [0, 0]
-                else:
-                    temp = [0, 1]
+                temp = [0, 0]
                 filename = file[:-4] + 'split' + str(i) + '.png'
                 temp[0] = filename
                 image_name_list.append(temp)
@@ -137,75 +101,59 @@ def image_split_and_label_binary(path):
                     cv2.imwrite(filename, split)
                 i += 1
 
-    return image_name_list
+    if os.path.exists(stegos):
+        direct = os.listdir(stegos)
 
-def image_split_and_label_multiclass(path, stego):
-    image_name_list = []
-    split_dim = [124,124]
+        for file in direct:
+            image = cv2.imread(stegos + file)
+            tiles = [image[x:x + split_dim[0], y:y + split_dim[1]] for x in
+                     range(0, image.shape[0] - (image.shape[0] % split_dim[0]), split_dim[0]) for y in
+                     range(0, image.shape[1] - (image.shape[1] % split_dim[1]), split_dim[1])]
 
-    if os.path.exists(path):
-        direct = os.listdir(path)
-    
-    for file in direct:
-        image = cv2.imread(direct+file)
-        
-        tiles = [image[x:x+split_dim[0], y:y+split_dim[1]] for x in range(0, image.shape[0]-(image.shape[0]%split_dim[0]),split_dim[0]) for y in range(0, image.shape[1]-(image.shape[1]%split_dim[1]),split_dim[1])]
-        
-        i = 0
-        
-        os.chdir(direct+'split/')
-        
-        for split in tiles:
-            filename = file[:-4]+'split'+str(i)+'.png'
-            if stego == 0:
-                temp=[0,0]
+            i = 0
+
+            if os.path.exists(path + 'split/'):
+                os.chdir(path + 'split/')
             else:
-                img_class = file.split('_')[2]
-                match img_class:
+                os.mkdir(path + 'split/')
+                os.chdir(path + 'split/')
 
+            for split in tiles:
+                temp = [0, 1]
+                filename = file[:-4] + 'split' + str(i) + '.png'
+                temp[0] = filename
 
-
-                    case "eth":
-
-                        temp = [0, 1]
-
-                    case "ps":
-
-                        temp = [0, 2]
-
-                    case "html":
-
-                        temp = [0, 3]
-
-                    case "url":
-
-                        temp = [0, 4]
-
-                    case "js":
-
-                        temp = [0, 5]
-            temp[0] = filename
-            image_name_list.append(temp)
-                
-            if not os.path.isfile(direct+'split/'+filename):
-                cv2.imwrite(filename, split)
-            i+=1
+                if not os.path.isfile(path + 'split/' + filename):
+                    cv2.imwrite(filename, split)
+                    image_name_list.append(temp)
+                i += 1
 
     return image_name_list
 
 def main():
-    dataset = 1
-    linux = True
-    if linux:
-        match dataset:
-            case 0:
-                root = '/home/bryce/PycharmProjects/IMCS Datasets/marcozuppelli/'
-                datasetPrep(root, True, 0)
+    target = '/home/bryce/PycharmProjects/IMCS_Datasets/test/'
 
-            case 1:
-                root = '/home/bryce/PycharmProjects/IMCS Datasets/MobiStego_S8_0-10_auto/'
-                datasetPrep(root, True, 1)
+    if not os.path.exists(target):
+        os.mkdir(target)
 
+    root = '/home/bryce/PycharmProjects/IMCS_Datasets/MobiStego/'
+    datasetPrep(root, True, target)
+    #root = '/home/bryce/PycharmProjects/IMCS_Datasets/PixelKnot/'
+    #datasetPrep(root, True, target)
+    #root = '/home/bryce/PycharmProjects/IMCS_Datasets/Passlok/'
+    #datasetPrep(root, True, target)
+    #root = '/home/bryce/PycharmProjects/IMCS_Datasets/PocketStego/'
+    #datasetPrep(root, True, target)
+    #root = '/home/bryce/PycharmProjects/IMCS_Datasets/Meznik/'
+    #datasetPrep(root, True, target)
+    #root = '/home/bryce/PycharmProjects/IMCS_Datasets/Pictograph/'
+    #datasetPrep(root, True, target)
+
+    trainRoot = target + 'train/'
+    savetxt('lsb_train_labels_binary.csv', asarray(image_split_and_label_binary(trainRoot)), delimiter=',', fmt="%s")
+
+    testRoot = target + 'test/'
+    savetxt('lsb_test_labels_binary.csv', asarray(image_split_and_label_binary(testRoot)), delimiter=',', fmt="%s")
 
     return
 

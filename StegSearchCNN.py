@@ -35,7 +35,7 @@ class LSB_Dataset(data.Dataset):
     
     def __getitem__(self, index):
         img_path = os.path.join(self.img_dir, self.img_labels.iloc[index,0])
-        image = cv2.imread(img_path) 
+        image = cv2.imread(img_path)
         image = torch.from_numpy(image)
         image = image.permute(2,0,1)
         image = image.float()
@@ -125,7 +125,9 @@ class LSB_ConvNet(nn.Module):
         x = self.fc(x)
         return x
 
-dir = '/home/bryce/PycharmProjects/IMCS Datasets/MobiStego_S8_0-10_auto/'
+trainDir = '/home/bryce/PycharmProjects/IMCS_Datasets/combined/train/split/'
+
+testDir = '/home/bryce/PycharmProjects/IMCS_Datasets/combined/test/split/'
 
 BATCH_SIZE = 128
 lr = 0.001
@@ -147,18 +149,18 @@ else:
         
 def main():
     
-    print("==> Loading Data ...")
+    print("Loading Data ...")
     
     if num_classes == 1:
         label_class = 'binary'
     else:
         label_class = 'multiclass'
+
+    train_labels = trainDir + 'lsb_train_labels_' + label_class + '.csv'
+    test_labels = testDir + 'lsb_test_labels_' + label_class + '.csv'
     
-    train_labels = dir+'train/split/lsb_train_labels_'+label_class+'.csv'
-    test_labels = dir+'test/split/lsb_test_labels_'+label_class+'.csv'
-    
-    train_data = LSB_Dataset(train_labels, dir+'train/split')
-    test_data = LSB_Dataset(test_labels, dir+'test/split')
+    train_data = LSB_Dataset(train_labels, trainDir)
+    test_data = LSB_Dataset(test_labels, testDir)
       
     train_dataloader = data.DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
     train_dataloader_at_eval = data.DataLoader(train_data, batch_size=2*BATCH_SIZE, shuffle=False)
@@ -205,6 +207,11 @@ def main():
                 if num_classes == 1:
                     targets = targets.to(torch.float32)
                     outputs = outputs.softmax(dim=-1)
+                    i= 0
+                    while i < 10:
+                        print(targets)
+                        print(outputs)
+                        i+=1
                 
                 else:
                     targets = targets.squeeze().long()
