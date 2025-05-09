@@ -131,13 +131,13 @@ def image_split_and_label_binary(path):
     return image_name_list
 
 def main():
-    target = '/home/bryce/PycharmProjects/IMCS_Datasets/test/'
+    target = '/home/bryce/PycharmProjects/IMCS_Datasets/PNG_Only/'
 
     if not os.path.exists(target):
         os.mkdir(target)
 
-    root = '/home/bryce/PycharmProjects/IMCS_Datasets/MobiStego/'
-    datasetPrep(root, True, target)
+    #root = '/home/bryce/PycharmProjects/IMCS_Datasets/MobiStego/'
+    #datasetPrep(root, True, target)
     #root = '/home/bryce/PycharmProjects/IMCS_Datasets/PixelKnot/'
     #datasetPrep(root, True, target)
     #root = '/home/bryce/PycharmProjects/IMCS_Datasets/Passlok/'

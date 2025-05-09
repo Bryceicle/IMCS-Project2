@@ -120,7 +120,7 @@ class ResNet(nn.Module):
         return x
 
 
-dataset = 2
+dataset = 1
 
 match dataset:
 
@@ -132,6 +132,12 @@ match dataset:
 
     case 3:
         dataDir = 'combined'
+
+    case 4:
+        dataDir = 'Pictograph_Only'
+
+    case 5:
+        dataDir = 'MobiStego_Only'
 
 
 
@@ -175,7 +181,7 @@ def main():
     train_dataloader_at_eval = data.DataLoader(train_data, batch_size=2*BATCH_SIZE, shuffle=False)
     test_dataloader = data.DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=True)
 
-    load_model = False
+    load_model = True
 
     if not load_model:
 
@@ -209,8 +215,8 @@ def main():
     
     def test(split):
         
-        false_positives = []
-        false_negatives = []
+        false_positives = 0
+        false_negatives = 0
         y_true = torch.tensor([])
         y_score = torch.tensor([])
         
@@ -230,13 +236,7 @@ def main():
                     targets = targets.squeeze().long()
                     outputs = outputs.softmax(dim=-1)
                     targets = targets.float().resize_(len(targets), 1)
-                """
-                for i in range(len(outputs)):
-                    if outputs[i] > 0.5 and targets[i] == 0:
-                        false_positives.append(inputs[1])
-                    if outputs[i] < 0.5 and targets[i] == 1:
-                        false_negatives.append(inputs[1])
-                """  
+
                 y_true = torch.cat((y_true, targets), 0)
                 y_score = torch.cat((y_score, outputs), 0)
     
@@ -252,12 +252,22 @@ def main():
                 f1_score = multiclass_f1_score(y_score, y_true, num_classes=num_classes)
             
             acc = (torch.argmax(y_score) == torch.argmax(y_true)).float().mean()
-                
+
+            for i in range(len(y_true)):
+                if y_true[i] == 0 and y_score[i] > 0.5:
+                    false_positives += 1
+
+            for i in range(len(y_true)):
+                if y_true[i] == 1 and y_score[i] < 0.5:
+                    false_negatives += 1
+
             print('\nacc: ', acc)
             print('f1: ', f1_score)
+            print('False Positives: ', false_positives/len(y_score))
+            print('False Negatives: ', false_negatives/len(y_score))
             
        
-    print('==> Evaluating ...')
+    print('\n==> Evaluating ...')
     print('Training')
     test('train')
     print('\nTesting:')
